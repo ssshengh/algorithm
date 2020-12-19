@@ -19,20 +19,20 @@ public class Basic {
         //输出自己，然后找到root这个节点的左右节点
         if (root == null)
             return;
-        list.add(root.val);
-        preorderTraversal(root.left, list);
-        preorderTraversal(root.right, list);
+        list.add(root.val);//中
+        preorderTraversal(root.left, list);//左
+        preorderTraversal(root.right, list);//右
         //根左右
     }
     //中序遍历
     private void midOrderRecur(TreeNode root, List<Integer> list){
-        //关键在于函数定义实现的是什么，这个是中序遍历，详细来说就是要干这么个事：找到root这个节点的左节点，没有的话输出自己，然后找他的右节点
+        //关键在于函数定义实现的是什么，这个是中序遍历，详细来说就是要干这么个事：找到root这个节点的左节点，输出自己，然后找他的右节点
         //进一步的，每一步，这个函数干的就是返回自己的值
         if (root == null)
             return;
-        midOrderRecur(root.left,list);//找到root.left的左节点输出
-        list.add(root.val);
-        midOrderRecur(root.right, list);//找到root.right的左节点输出
+        midOrderRecur(root.left,list);//找到root.left的左节点输出，左
+        list.add(root.val);//中
+        midOrderRecur(root.right, list);//找到root.right的左节点输出，右
         //注意三个遍历这里的区别，体现出了递归的总体思路
         //每一个子问题就是一颗最小的二叉树，三个节点，三序遍历后作为某个节点并入更大的一棵树内
         //这里最小的一棵就是三个节点，从中间开始，看中间的左节点，然后输出左节点
@@ -171,7 +171,7 @@ public class Basic {
     }
 
 
-    private static class TreeNode {
+    static class TreeNode {
       int val;
       TreeNode left;
       TreeNode right;
