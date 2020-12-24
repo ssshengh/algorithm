@@ -100,11 +100,36 @@ public class Basic {
             TreeNode node = stack1.pop();
             //stack2相当于把树按顺序排好了
             stack2.push(node);
-            //注意是先放左再放右，与前序遍历区分开,因为反过来了，画个图
+            //注意是先放左再放右，与前序遍历区分开,因为反过来了，画个图，而且注意这里放入的是栈1不是栈2
+            //栈2里就是变成了中右左，因此出来没问题
             if (node.left != null)
                 stack1.push(node.left);
             if (node.right != null)
                 stack1.push(node.right);
+        }
+    }
+    //第二种后序遍历写法，减少了空间开销
+    //关键思路在于利用一个cur记录当前输出的节点
+    //因此，通过cur可以检查输出后，其输出的根节点是否还有右子节点（根必为上一次压入的元素），然后再进行遍历（因为是最先遍历左）
+    //押入的顺序是中左右，压入根后一直遍历到最左，使得上述条件可以进行
+    public static void postOrderIteration2(TreeNode head) {
+        if (head == null) {
+            return;
+        }
+        TreeNode cur = head;//用一个指针cur标记当前输出的节点是什么
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(head);
+        while (!stack.isEmpty()) {
+            TreeNode peek = stack.peek();//最后压入的元素
+            if (peek.left != null && peek.left != cur && peek.right != cur) {
+                //防止cur定位到右子节点的时候失败，重复压入左子节点，下面的无需担心这个问题
+                stack.push(peek.left);
+            } else if (peek.right != null && peek.right != cur) {
+                stack.push(peek.right);
+            } else {
+                System.out.print(stack.pop().val + " ");
+                cur = peek;
+            }
         }
     }
 
