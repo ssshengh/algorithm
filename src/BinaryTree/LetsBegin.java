@@ -1,5 +1,7 @@
 package BinaryTree;
 
+import java.util.HashMap;
+
 public class LetsBegin {
 
     class Node {
@@ -35,5 +37,48 @@ public class LetsBegin {
      * 感谢题解：https://leetcode-cn.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/solution/tu-jie-gou-zao-er-cha-shu-wei-wan-dai-xu-by-user72/
      * 参考后，解决方案关键在于引入一个map，将一个数组的所有元素以及索引存入（利用了元素不能重复）
      * */
+    HashMap<Integer, Integer> inorderArrayMap = new HashMap<>(); //用以中序遍历中的元素
+    int[] post; //用以放置后序遍历，便于后面调用
+    public Node buildTree(int [] inorder, int [] postorder){
+        for (int i = 0; i<inorder.length; i++){
+            inorderArrayMap.put(inorder[i], i);//键为树中的值，值为所处的序号
+        }
+        post = postorder;
+        return buildTree(0, inorder.length-1, 0, postorder.length-1);
+    }
+    private Node buildTree(int leftInorder, int rightInorder, int leftPostorder, int rightPostorder){
+        //注意这里转换为了当起点大于终点的时候，作为约束条件。另外注意这个return null,思考的时候是在某一个子问题会返回null
+        if (leftInorder > rightInorder || leftPostorder > rightPostorder) return null;
 
+        int root = post[rightPostorder];//从每一棵子树的后序遍历中获得根节点
+        int rootIndexInInorderArray = inorderArrayMap.get(root); //获取根节点的值
+        Node node = new Node(root);
+        node.left = buildTree(leftInorder, rootIndexInInorderArray-1,
+                leftPostorder, leftPostorder+rootIndexInInorderArray-leftInorder-1);
+        node.right = buildTree(rootIndexInInorderArray+1, rightInorder,
+                leftPostorder+rootIndexInInorderArray-leftInorder, rightPostorder-1);
+        return node;
+    }
+
+    /**
+     * 前序+中序，一样的思路
+     * */
+    public Node buildTree1(int[] preorder, int[] inorder){
+        for (int i=0; i<inorder.length; i++)
+            inorderArrayMap.put(inorder[i], i);
+        post = preorder;
+        return buildTree1(0, preorder.length-1, 0, inorder.length-1);
+    }
+    private Node buildTree1(int ps, int pe, int is, int ie){
+        if (ps>pe || is>ie)
+            return null;
+
+        int root = post[ps];
+        int Index = inorderArrayMap.get(root);
+        Node node = new Node(root);
+
+        node.left = buildTree1(ps+1, ps+Index-is, is, Index-1);
+        node.right = buildTree1(pe+1-ie+Index, pe, Index+1, ie);
+        return node;
+    }
 }
