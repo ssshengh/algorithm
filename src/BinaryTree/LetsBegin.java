@@ -1,8 +1,6 @@
 package BinaryTree;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Queue;
+import java.util.*;
 
 public class LetsBegin {
 
@@ -217,4 +215,65 @@ public class LetsBegin {
         return root;
     }
 
+    /**
+     * 典型题！！！！！！！！！！
+     * 找到最近祖先节点：分析结论为，问题抽象为一个三节点树的子文题，关键在于两个节点如何在其中排布
+     * 思路是前序遍历的从上至下，但是实现不出来，无法处理一个关键问题，前序遍历下来，处理的是一个三节点子树
+     * 但是无法处理，p在左子树，q在右子树来返回两颗子树的根节点的情况，拆分着拆分着变成了两个递归，越想越复杂，感觉方向错了
+     * 看了看大佬的思路：后序遍历！！！！
+     * 典型的自底而上的思路！！！！！！！！！
+     * 后序遍历的关键在于，信息从哪里扒出来，传到哪里，在哪里处理（处理信息的单位还是一个三节点子树，对根与两个子节点进行处理）
+     * */
+    public Node lowestCommonAncestor(Node root, Node p, Node q) {
+        //获取信息，参考后序遍历的过程，信息主要以某个节点(可以在任何位置)的信息思考(是否等于某个值),在任何一个位置找到信息，将返回出去不再往下
+        //找到信息就回溯，不再往下，为空为强制终止条件
+        if (root == null || root == p || root == q)
+            return root;
+        //接受信息，若找寻的节点在left里，那么就会left等于这个节点
+        //即回溯信息暂存的位置
+        Node left = lowestCommonAncestor(root.left, p, q);
+        Node right = lowestCommonAncestor(root.right, p, q);
+
+        //处理信息并回传，关键在于如何防止信息回传的时候丢失，比如p在左子树，但是越往上回越大
+        //最后变成了p在树里面
+        //考虑找寻到所需信息时的最小三节点子问题(1)，在考虑递归子问题(2)，因为最下面处理的信息会回溯到上面的left和right
+        if (left == null)
+            return right; //所找节点不在左儿子，在右儿子(1),所找节点在右子树(2)
+        if (right == null)
+            return left; //所找节点在左儿子(1),所找节点在左子树(2)
+        if (right == null && left == null)
+            return null; //既不是左儿子也不是右儿子(1),既不在左子树也不在右子树(2)
+        return root; //(right != null && left != null) 既在左子树也在右子树(2)
+
+    }
+
+    /**
+     *  二叉树的序列化与反序列化
+     * */
+    public String serialize(Node root){
+        if (root == null)
+            return "s,";  //找到节点的信息，并结束寻找，回溯上来
+        String left = serialize(root.left);//接收左子树信息
+        String right = serialize(root.right);//右子树信息
+
+        return root.val + ',' + left + right; //以三节点子树为单位处理信息
+    }
+    public Node deserialize(String data) {
+        String[] temp = data.split(",");
+        Deque<String> dp = new LinkedList<>(Arrays.asList(temp));
+        return buildTree(dp);
+    }
+    private Node buildTree(Deque<String> dp){
+        String s = dp.poll();
+        assert s != null;
+        //这两句处理子问题中的root节点
+        if (s.equals("s"))
+            return null;
+        Node node = new Node(Integer.parseInt(s));
+        //这两句处理子问题中的左右子树，包含了回溯的信息
+        node.left = buildTree(dp);
+        node.right = buildTree(dp);
+        //这一句，处理整个三节点子树
+        return node;
+    }
 }
