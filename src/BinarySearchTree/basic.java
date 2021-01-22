@@ -279,7 +279,95 @@ public class basic {
         return ancetor;
     }
 
+    /**
+     * 通常，有两种最广泛使用的集合：散列集合（Hash Set）和 树集合（Tree Set）。
+     *
+     * 树集合，Java 中的 Treeset 或者 C++ 中的 set ，是由高度平衡的二叉搜索树实现的。因此，搜索、插入和删除的时间复杂度都是 O(logN) 。
+     *
+     * 散列集合，Java 中的 HashSet 或者 C++ 中的 unordered_set ，是由哈希实现的，但是平衡二叉搜索树也起到了至关重要的作用。当存在具有相同哈希键的元素过多时，将花费 O(N) 时间复杂度来查找特定元素，其中N是具有相同哈希键的元素的数量。 通常情况下，使用高度平衡的二叉搜索树将把时间复杂度从 O(N) 改善到 O(logN) 。
+     *
+     * 哈希集和树集之间的本质区别在于树集中的键是有序的。
+     * */
 
+    /**
+     * 给定一个二叉树，判断它是否是高度平衡的二叉树：一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 。
+     * 显然基本思路是，找一个变量存储每一层的高度，然后比较左右子树的高度
+     * 考虑递归
+     * 这道题难点在于怎么把高度差回溯上来，同时还保证原来的高度不被改变
+     * */
+    //没做出来，对比一下别人的思路看看，怎么把高度回溯上来的
+//    boolean isTrue = true;
+//    public boolean isBalanced(TreeNode root){
+//        if (root == null)
+//            return false;
+//        int high = 0;
+//        high = isBalanced(root, high, isTrue);
+//        return isTrue;
+//    }
+//    private int isBalanced(TreeNode root, int high, boolean isTrue){
+//        if (root == null || !isTrue)
+//            return high;
+//        high = high + 1;
+//        int left = isBalanced(root.left, high, isTrue);
+//        int right = isBalanced(root.right, high, isTrue);
+//        if (Math.abs(left - right) > 1)
+//            isTrue = false;
+//        return Math.max(left, right);
+//    }
+    public boolean isBalanced(TreeNode root) {
+        return recur(root) != -1;
+    }
+    //大佬的办法是通过一个特定高度阻断，直接回溯上去
+    //我想要采用一个bool变量来进行阻断
+    //还有在高度的处理上我用一个外部变量来处理，这个搞麻烦了许多，我模仿其高度的迭代方法，使用额外bool阻断看看
+    private int recur(TreeNode root) {
+        if (root == null) return 0;
+        int left = recur(root.left);
+        if(left == -1) return -1;
+        int right = recur(root.right);
+        if(right == -1) return -1;
+        return Math.abs(left - right) < 2 ? Math.max(left, right) + 1 : -1;
+    }
 
+    //第二版自己写的：
+    //对比得到两个问题与不足：1、全局变量像错误的那种写的话，那么会被作用域屏蔽，所以传递不出来
+    //                      2、自底而上的高度的处理方法，应该记住
+    boolean isTrue = true;
+    public boolean isBalanced1(TreeNode root){
+        if (root == null)
+            return true;
+        int high = 0;
+        high = isBalanced_in(root);
+        return isTrue;
+    }
+    private int isBalanced_in(TreeNode root){
+        if (root == null || !isTrue)
+            return 0;
+        int left = isBalanced_in(root.left);
+        int right = isBalanced_in(root.right);
+        if (Math.abs(left - right) > 1)
+            isTrue = false;
+        return Math.max(left, right) + 1;
+    }
+
+    //从一个升序数组恢复二叉搜索平衡树，注意要点：升序==二叉搜索树的中序遍历
+    //平衡：两边节点数目一样，排序方法一样，就不用考虑二叉树的平衡了，也不用考虑上滤下滤了
+    public TreeNode sortedArrayToBST(int[] nums){
+        return dfs(nums, 0, nums.length-1);
+    }
+    private TreeNode dfs(int[] nums, int left,  int right){
+        if (left > right)
+            return null;
+        int mid = left + (right-left)/2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = dfs(nums, left, mid-1);
+        root.right = dfs(nums, mid+1, right);
+        return root;
+    }
+
+    public static void main(String[] args) {
+        int a = (1-0)/2;
+        System.out.println(a);
+    }
 
 }
