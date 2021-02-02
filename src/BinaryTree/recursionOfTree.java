@@ -26,7 +26,7 @@ public class recursionOfTree {
 
     private int answer = 1;//根节点，深度初始化为1
     //函数干个什么事：查找root，并有可能的话跟新深度
-    private void  Max_depth(treeNode root, int depth){
+    private void Max_depth(treeNode root, int depth){
         //递归结束条件
         if (root == null)
             return;
@@ -97,7 +97,6 @@ public class recursionOfTree {
     * 时间复杂度：这里遍历了这棵树，渐进时间复杂度为 O(n)。
     * 空间复杂度：这里的空间复杂度和递归使用的栈空间有关，这里递归层数不超过n，故渐进空间复杂度为O(n)
     * */
-
     //迭代方法：从递归来实现，迭代的本质都是把递归里隐藏的栈或者队列显式陈列了
     //思路很简单，关键是巧妙的利用continue实现
     public boolean isSymmetric_D (treeNode root){

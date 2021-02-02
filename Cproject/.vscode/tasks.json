@@ -7,6 +7,7 @@
             "args": [
                 "-g",
                 "${file}",
+                "-L","/Users/shenheng/anaconda3/envs/Py/lib",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-std=c++11"
