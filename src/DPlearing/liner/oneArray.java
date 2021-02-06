@@ -1,6 +1,7 @@
 package DPlearing.liner;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * LIS 是单串上最经典的问题，它的状态设计是单串动态规划最经典的状态设计。
@@ -120,11 +121,12 @@ public class oneArray {
         for (int i = 1; i<N; i++){
             for (int j = 0; j<i; j++){
                 if (nums[j] < nums[i]){
-                    if (dp[j] + 1 > dp[i])//注意这里考虑等于的时候，可以处理dp[0]的情况
-                    {
+                    if (dp[j] + 1 > dp[i])
+                    {//和LIS一样的更新dp数组，找到一个大的，如果比当前存储的dp[i]大，则意味着找到了一个长1的最长子序列
                         dp[i] = dp[j] + 1;
                         count[i] = count[j];
                     }else if (dp[j] +1 == dp[i])
+                        //这里意味着，长度为这么长的子序列我们已经找到一次了
                         count[i] += count[j];
                 }
             }
@@ -160,5 +162,24 @@ public class oneArray {
         }
         return len;
     }
+
+    public int maxEnvelopes(int[][] envelopes) {
+        // sort on increasing in first dimension and decreasing in second
+        Arrays.sort(envelopes, new Comparator<int[]>() {//注意这个函数参数的用法，要改变默认的排序方法，需要使用类的数据类型
+            @Override
+            public int compare(int[] arr1, int[] arr2) {
+                if (arr1[0] == arr2[0]) {
+                    return arr2[1] - arr1[1];//根据大于0小0来判定
+                } else {
+                    return arr1[0] - arr2[0];
+                }
+            }
+        });
+        // extract the second dimension and run LIS
+        int[] secondDim = new int[envelopes.length];
+        for (int i = 0; i < envelopes.length; ++i) secondDim[i] = envelopes[i][1];
+        return lengthOfLIS_1(secondDim);
+    }
+
 }
 
