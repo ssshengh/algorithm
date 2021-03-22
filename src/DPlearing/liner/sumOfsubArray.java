@@ -42,8 +42,9 @@ public class sumOfsubArray {
 //            ans = Math.max(max, ans);
 //        }不能这么写，第一个不为1时会被乘两次
         for (int i = 1; i<nums.length; i++){
-            max = Math.max(max*nums[i], Math.max(min*nums[i], nums[i]));
-            min = Math.min(max*nums[i], Math.min(min*nums[i], nums[i]));
+            int mn = min, mx = max;
+            max = Math.max(mx*nums[i], Math.max(mn*nums[i], nums[i]));
+            min = Math.min(mx*nums[i], Math.min(mn*nums[i], nums[i]));
             ans = Math.max(max, ans);
         }
         return ans;
@@ -108,10 +109,32 @@ public class sumOfsubArray {
         }
         return max;
     }
+    //有种写法，记录起始位置的
+    public int[] maxSubarray(int[] B){
+        int max = Integer.MIN_VALUE;
+        int dp = B[0];
+        int[] ans = new int[2];//记录起始位置
+        int begin = 0;
+
+        for (int i = 1; i<B.length; i++){
+            if (dp >0 )
+                dp+=B[i];
+            else {
+                dp = B[i];
+                begin = i;
+            }//关键在这里，他把最大子数组和的求和分裂成了，大于0与小于等于0两种情况
+            if (dp > max){
+                max = dp;
+                ans[0] = begin;
+                ans[1] = i;
+            }
+        }
+        return ans;
+    }
 
     //怎么写都不太对，看看大佬的思路：
     public int maxSubarraySumCircular_2(int[] A) {
-        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Integer> list = new ArrayList<>();//储存两倍的数组
         int n = A.length;
         for (int i = 0; i < 2; i++) {
             for (int i1 : A) list.add(i1);
@@ -121,6 +144,7 @@ public class sumOfsubArray {
         for (int i = 1; i <= 2 * n; i++) {
             preSum[i] = preSum[i - 1] + list.get(i-1);
         }
+
         int ans = Integer.MIN_VALUE;
         Deque<Integer> q = new LinkedList<>();
         q.offerLast(0);
@@ -136,7 +160,159 @@ public class sumOfsubArray {
 
 
     /**
-     *
+     * 求最大子矩阵和：
+     * 注意点：降维、以及如何暂存元素
+     * 参照一维的存储位置的情况：dp大小变化(dp替换为新的起点时更新起点终点，正常加一个时更新终点)
      * */
+    public int[] getMaxMatrix(int[][] matrix){
+        int[] ans = new int[4];//结果储存数组
+        int size_row = matrix.length;
+        int size_column = matrix[0].length;
+        int[] dim1_array = new int[size_column];
+        int c_begin = 0;//用以记录即时的起始点的列数(行数由循环的i与j标出)
+        int r_begin = 0;//记录即时起始点行
+        int c_end = 0;//记录即时的终点的列数
+        int max = Integer.MIN_VALUE;
+        int dp = 0;//动态规划状态
+
+        for (int i = 0; i<size_row; i++){
+            for (int j = 0; j<size_column; j++)
+                dim1_array[j] = 0;//每一次先要把暂存的一维数组清空
+
+            for (int j = i; j < size_row; j++){
+                dp = 0;//每一次应该先被重置，然后再计算
+                for (int k=0; k<size_column; k++) {
+                    dim1_array[k] += matrix[j][k];
+                    //我们只是不断增加其高，也就是下移矩阵下边，所有这个矩阵每列的和只需要加上新加的哪一行的元素！！！！！！！
+                    //因为我们求dp[i]的时候只需要dp[i-1]和nums[i],所有在我们不断更新一维数组时就可以求出当前位置的dp!!!!!
+                    if (dp > 0)
+                        dp += dim1_array[k];
+                    else {
+                        dp = dim1_array[k];
+                        c_begin = k;
+                    }
+                    if (dp > max){
+                        max = dp;
+                        ans[0] = i;
+                        ans[1] = c_begin;
+                        ans[2] = j;
+                        ans[3] = k;
+
+                    }
+
+                }
+            }
+        }
+        return ans;
+
+    }
+
+    /**
+     * 给定一个非空二维矩阵 matrix 和一个整数 k，找到这个矩阵内部不大于 k 的最大矩形和。
+     * */
+    public int maxSumSubmatrix1(int[][] matrix, int k){
+        int dp = 0;
+        int max = Integer.MIN_VALUE;
+        int size_row = matrix.length;
+        int size_column = matrix[0].length;
+        int[] dim1_array = new int[size_column];
+        int max_lowOfk = Integer.MIN_VALUE;
+
+        for (int i = 0; i<size_row; i++){
+            for (int j = 0; j<size_column; j++)
+                dim1_array[j] = 0;//每一次先要把暂存的一维数组清空
+
+            for (int j = i; j<size_row; j++ ){
+                dp = 0;
+                for (int n = 0; n<size_column; n++){
+                    dim1_array[n] += matrix[j][n];
+                    dp = Math.max(dp+dim1_array[n], dim1_array[n]);
+//                    if (dp >k)
+//                        return max;
+                    //这种有个问题是[2,2,1]，3时，求到4就跳出来了，无法得到正确答案3，还需要一个元素来记下小于等于3的值
+                    if (dp > max)
+                        max = dp;
+                    if (max <= k && max > max_lowOfk)
+                        max_lowOfk = max;//这种可以解决上述问题，但无法解决这个问题，只要k小于任何一个数组中的数，就失败了
+
+                }
+            }
+        }
+        return max_lowOfk;
+    }
+
+    public int maxSumSubmatrix(int[][] matrix, int k){
+        int dp = 0;
+        int max = Integer.MIN_VALUE;
+        int size_row = matrix.length;
+        int size_column = matrix[0].length;
+        int[] dim1_array = new int[size_column];
+        int max_lowOfk = Integer.MIN_VALUE;
+
+        for (int i = 0; i<size_row; i++){
+            for (int j = 0; j<size_column; j++)
+                dim1_array[j] = 0;//每一次先要把暂存的一维数组清空
+
+            for (int j = i; j<size_row; j++ ){
+                dp = 0;
+                for (int n = 0; n<size_column; n++){
+                    dim1_array[n] += matrix[j][n];
+                }
+                //改思路，在每一次把压缩数组求出来再求解
+                //暴力求最大值
+                max = Math.max(max, dpmax(dim1_array, k));
+                if (max == k)
+                    return k; // 尽量提前
+            }
+        }
+        return max;
+    }
+    // 在数组 arr 中，求不超过 k 的最大值，考虑[2,2,-1],0
+    private int dpmax(int[] arr, int k) {
+        int rollSum = arr[0], rollMax = rollSum;
+        // O(rows) 常规求最大和
+        for (int i = 1; i < arr.length; i++) {
+            if (rollSum > 0)
+                rollSum += arr[i];
+            else
+                rollSum = arr[i];
+            if (rollSum > rollMax)
+                rollMax = rollSum;
+        }
+        if (rollMax <= k)
+            return rollMax; //失败用例时，这儿的结果是2
+        // O(rows ^ 2)这一步为了解决我遇到的第二个问题，k很小的时候怎么办，这里是暴力法解决的
+        int max = Integer.MIN_VALUE;
+        for (int l = 0; l < arr.length; l++) {
+            int sum = 0;
+            for (int r = l; r < arr.length; r++) {
+                sum += arr[r];
+                if (sum > max && sum <= k)
+                    max = sum;//失败用例时，这儿在取到-1的时候才会赋值
+                if (max == k)
+                    return k; // 尽量提前
+            }
+        }
+        return max;
+    }
+    //对暴力解法的优化，动态规划的求最大和优化，依然考虑[2,2,-1],0
+    //这个方法有问题，错误的
+    private int helper3(int[] nums, int k) {
+        int[] dp = new int[nums.length + 1];
+        dp[0] = nums[0];
+        int res = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]);
+            if (dp[i] == k) {
+                return dp[i];
+            }
+            if (res < dp[i] && dp[i] < k) {
+                res = dp[i];
+            }
+            // res = Math.max(dp[i], res);
+        }
+        return res;
+    }
+
 
 }
