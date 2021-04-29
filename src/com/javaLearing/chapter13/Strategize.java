@@ -2,9 +2,7 @@ package com.javaLearing.chapter13;
 
 // functional/Strategize.java
 
-interface Strategy {
-    String approach(String msg);
-}
+
 
 class Soft implements Strategy {
     public String approach(String msg) {

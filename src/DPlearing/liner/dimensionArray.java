@@ -395,4 +395,61 @@ public class dimensionArray {
         return Math.max(dp[len-1][1][0], Math.max(res, dp[len-1][2][0]));
     }
 
+    /**
+     * 编辑距离：关键是把操作简化，并最终联系起来其转换方式
+     * */
+    public int minDistance_ok(String word1, String word2){
+        int len1 = word1.length(), len2 = word2.length();
+        if (len1==0 && len2==0)
+            return 0;
+        //定义状态为前i个前j个的编辑距离，即修改为一样的需要多少操作
+        int[][] dp = new int[len1+1][len2+1];
+        //初始化，很重要，但是后面考虑可不可以融进另一个循环中
+        for (int i = 0; i<len1+1; i++)
+            dp[i][0] = i;
+        for (int i = 0; i<len2+1; i++)
+            dp[0][i] = i;
+
+        //注意加一减一，这种定义下老是忘记
+        for (int i = 1; i<len1+1; i++){
+            for (int j = 1; j<len2+1; j++){
+                //这里看笔记，思路太nb了
+                if (word1.charAt(i-1) == word2.charAt(j-1))
+                    dp[i][j] = Math.min(dp[i][j-1], Math.min(dp[i-1][j], dp[i-1][j-1]-1))+1;
+                else
+                    dp[i][j] = Math.min(dp[i][j-1], Math.min(dp[i-1][j], dp[i-1][j-1]))+1;
+            }
+        }
+        return dp[len1][len2];
+
+    }
+    //优化一下,其实时间没有太多变化，毕竟一个量级的
+    public int minDistance(String word1, String word2){
+        int len1 = word1.length(), len2 = word2.length();
+        if (len1==0 && len2==0)
+            return 0;
+        //定义状态为前i个前j个的编辑距离，即修改为一样的需要多少操作
+        int[][] dp = new int[len1+1][len2+1];
+
+        //注意加一减一，这种定义下老是忘记
+        for (int i = 0; i<len1+1; i++){
+            for (int j = 0; j<len2+1; j++){
+                if (i==0 || j==0)
+                {
+                    dp[i][0] = i;
+                    dp[0][j] = j;
+                    continue;
+                }
+                //这里看笔记，思路太nb了
+                if (word1.charAt(i-1) == word2.charAt(j-1))
+                    dp[i][j] = Math.min(dp[i][j-1], Math.min(dp[i-1][j], dp[i-1][j-1]-1))+1;
+                else
+                    dp[i][j] = Math.min(dp[i][j-1], Math.min(dp[i-1][j], dp[i-1][j-1]))+1;
+            }
+        }
+        return dp[len1][len2];
+
+    }
+
+
 }
