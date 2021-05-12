@@ -3,6 +3,11 @@ package formulation.LinkedListll;
 
 import formulation.ListNode;
 
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
+
 public class Pointer1 {
     /**
      * 主要是指针类型的链表问题
@@ -133,4 +138,168 @@ public class Pointer1 {
         return virtualHead.next;
     }
 
+    /**
+     * 24.两两交换链表中的节点
+     * 递归求解
+     */
+    public ListNode swapPairs(ListNode head) {
+        //结束条件，偶数时，奇数时
+        if (head==null || head.next==null)
+            return head;
+        ListNode next = head.next;
+        head.next = swapPairs(next.next);//每个子问题的第一个节点修改指向下一个子问题返回的头节点
+        next.next = head;//完成反转节点
+        return next;//关键，返回这个问题反转后的头节点，这样的话这个子问题的头节点的前一根链接上了
+    }
+    //迭代解法
+    public ListNode swapPairs2(ListNode head){
+        //虚拟头节点
+        ListNode virtualHead = new ListNode(0);
+        virtualHead.next = head;
+
+        ListNode pre = virtualHead;//不为head因为需要前驱节点的链
+        //ListNode cur = head.next;
+        while (pre.next != null && pre.next.next != null){
+            ListNode first = pre.next;
+            ListNode second = pre.next.next;
+
+            pre.next = second;
+            first.next = second.next;
+            second.next = first;
+            pre = first;//注意这时候first已经变成第二个了
+        }
+        return virtualHead.next;
+    }
+
+    /**
+     * K 个一组翻转链表
+     */
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (k<=1) return head;
+
+        ListNode virtualHead = new ListNode(-1);
+        virtualHead.next = head;
+        //前驱节点和右节点节点
+        ListNode pre = virtualHead, rightNode = head;
+        //左节点和后继节点在循环中定义
+        while (rightNode != null){
+            ListNode leftNode = pre.next;//左节点
+            for (int i=0; i<k-1; i++) {
+                rightNode = rightNode.next;//右节点移动到正确的位置
+                if (rightNode == null)
+                    return virtualHead.next;//如果少于k的时候
+            }
+            ListNode curr = rightNode.next;//后继节点
+
+            //断开连接：
+            pre.next = null;
+            rightNode.next = null;
+            reverse(leftNode);//反转子部分
+            //重新接上，注意一个点，左右节点指向的空间没有变，因此虽然在函数中反转了链，但是二者还是正确的指向了头尾，只不过反了过来
+            pre.next = rightNode;
+            leftNode.next = curr;
+
+            pre = leftNode;//注意结束后，前驱节点需要来到反转后链表的最后一个作为前驱节点
+            rightNode = leftNode.next;//右节点到下一个字表的开始的第一个位置才正确
+        }
+        return virtualHead.next;
+    }
+
+    /**
+     * 删除链表的倒数第 N 个节点，关键在于先要找到到底有多少个链表节点
+     */
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        //n最大为链表长度，所以不用考虑取模
+        int len = lenOfLinked(head);
+        ListNode virtualHead = new ListNode(-1);
+        virtualHead.next = head;
+
+        ListNode pre = virtualHead;
+        //画个图就知道了，要删除的倒数第N个节点的前驱节点需要从VH走len-N步
+        for (int i = 0; i<len-n; i++)
+            pre = pre.next;
+
+        ListNode delete = pre.next;
+        pre.next = delete.next;
+        delete.next = null;//注意先把指针释放了，防止空空间引用
+        delete = null;//释放指针，但好像没有必要
+
+        return virtualHead.next;
+    }
+    private int lenOfLinked(ListNode head){
+        int len = 0;
+        while (head!=null){
+            len++;
+            head = head.next;
+        }
+        return len;
+    }
+    //快慢指针法：
+    public ListNode removeNthFromEnd_fl(ListNode head, int n){
+        ListNode virtualHead = new ListNode(-1);
+        virtualHead.next = head;
+
+        ListNode fast = virtualHead;
+        ListNode slow = virtualHead;
+        for (int i = 0; i <= n; i++) {
+            fast = fast.next;//块先走n+1步，为什么不是n步，因为要确保同时走的时候它走到空
+        }
+        while (fast!=null){
+            fast = fast.next;
+            slow = slow.next;
+        }
+
+        ListNode delete = slow.next;//要删除的节点
+        slow.next = delete.next;
+        delete.next = null;
+        return virtualHead.next;
+    }
+
+    /**
+     * 找到链表的中间节点
+     * @param head 头节点
+     * @return 返回中间节点
+     */
+    public ListNode middleNode(ListNode head) {
+        //可以不用虚拟头节点
+        if (head==null) return null;
+        ListNode fast = head;
+        ListNode slow = head;
+        while (fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
+    /**
+     * 两数相加：
+     */
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2){
+        ListNode virtualHead = new ListNode(0);//相加之后结果的虚拟头节点
+        ListNode cur = virtualHead;//指针，从虚拟头节点开始
+        int count = 0;//余数
+        while (l1 != null || l2 != null){
+            //这里考虑了，如果有一个链表长一些的话，那么就不断用长链表加0就可以了
+            int x = l1==null? 0 : l1.val;
+            int y = l2==null? 0 : l2.val;
+
+            int sum = x + y + count;
+            count = sum/10;//进位，只能进1
+            sum = sum%10;//余数
+
+            cur.next = new ListNode(sum);
+            cur = cur.next;
+
+            if (l1!=null) l1 = l1.next;
+            if (l2!=null) l2 = l2.next;
+        }
+        //还有个忘记的，如果全部加完结束了还有一个进位
+        if (count >= 1) cur.next = new ListNode(count);
+        return virtualHead.next;
+    }
+
+    /**
+     * 两数相加II
+     */
 }
